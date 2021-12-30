@@ -16,6 +16,7 @@ dir.create(here("data", "epiforecasts-weeklygrowth"))
 
 # Load functions
 source(here("R", "get_obs.R"))
+source(here("R", "format_forecasts.R"))
 
 # Get the data
 cases <- get_obs(weeks = 12)
@@ -36,7 +37,7 @@ fits <- future.apply::future_lapply(
   r_step = 1,
   keep_fit = TRUE,
   horizon = 4,
-  beta = c(0, 0.5),
+  beta = c(-0.5, 0.25),
   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
   parallel_chains = 1,
   iter_warmup = 500,
@@ -80,25 +81,10 @@ ggsave(plot = plot_growth,
 )
 
 # Format output for the hub
-forecasts <- fv_extract_forecast(posterior)[value_type == "cases"]
-cols <- grep("q[1-9]", colnames(forecasts), value = TRUE)
-cols <- c("location", "location_name", "date", "horizon", cols)
-forecasts <- forecasts[, ..cols]
-forecasts <- quantiles_to_long(forecasts)
-forecasts <- forecasts[,
-  .(
-    forecast_date = forecast_date,
-    target = paste0(horizon, " wk ahead inc cases"),
-    target_end_date = date,
-    location = location,
-    type = "quantile",
-    quantile,
-    value = prediction
-  )
-]
+forecast_date <- max(cases$date) + 1
+forecasts <- format_forecasts(posterior, forecast_date)
 
 # Save forecasts
-forecast_date <- max(cases$date) + 1
 fwrite(
   forecasts,
   here("data", "epiforecasts-weeklygrowth",
