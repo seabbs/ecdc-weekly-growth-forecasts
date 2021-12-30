@@ -12,7 +12,9 @@ if (!dir.exists(here("figures"))) {
   dir.create(here("figures"), recursive = TRUE)
 }
 unlink(here("data-processed", "epiforecasts-weeklygrowth"), recursive = TRUE)
-dir.create(here("data-processed", "epiforecasts-weeklygrowth"))
+dir.create(
+  here("data-processed", "epiforecasts-weeklygrowth"), recursive = TRUE
+)
 
 # Load functions
 source(here("R", "get_obs.R"))
