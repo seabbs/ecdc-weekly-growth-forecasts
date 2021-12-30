@@ -11,15 +11,15 @@ library(ggplot2)
 if (!dir.exists(here("data", "figures"))) {
   dir.create(here("data", "figures"), recursive = TRUE)
 }
-unlink(here("data", "epiforecasts-weeklygrowth"), recursive = TRUE)
-dir.create(here("data", "epiforecasts-weeklygrowth"))
+unlink(here("data-processed", "epiforecasts-weeklygrowth"), recursive = TRUE)
+dir.create(here("data-processed", "epiforecasts-weeklygrowth"))
 
 # Load functions
 source(here("R", "get_obs.R"))
 source(here("R", "format_forecasts.R"))
 
 # Get the data
-cases <- get_obs(weeks = 12)
+cases <- get_obs(weeks = 16)
 
 # Precompile the model
 mod <- fv_model(strains = 1)
@@ -87,7 +87,7 @@ forecasts <- format_forecasts(posterior, forecast_date)
 # Save forecasts
 fwrite(
   forecasts,
-  here("data", "epiforecasts-weeklygrowth",
+  here("data-processed", "epiforecasts-weeklygrowth",
        paste0(forecast_date, "-epiforecasts-weeklygrowth.csv")
   )
 )
