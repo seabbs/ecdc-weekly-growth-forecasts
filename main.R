@@ -8,8 +8,8 @@ library(callr)
 library(ggplot2)
 
 # Create folders we need
-if (!dir.exists(here("data", "figures"))) {
-  dir.create(here("data", "figures"), recursive = TRUE)
+if (!dir.exists(here("figures"))) {
+  dir.create(here("figures"), recursive = TRUE)
 }
 unlink(here("data-processed", "epiforecasts-weeklygrowth"), recursive = TRUE)
 dir.create(here("data-processed", "epiforecasts-weeklygrowth"))
@@ -66,7 +66,7 @@ plot_cases <- plot(posterior, type = "cases", log = FALSE) +
   theme(legend.position = "none")
 
 ggsave(plot = plot_cases,
-       filename = here::here("data", "figures", "cases.png"),
+       filename = here::here("figures", "cases.png"),
        height = 16, width = 16, dpi = 300
 )
 
@@ -76,7 +76,7 @@ plot_growth <- plot(posterior, type = "growth") +
   labs(fill = NULL)
 
 ggsave(plot = plot_growth,
-       filename = here::here("data", "figures", "growth.png"),
+       filename = here::here("figures", "growth.png"),
        height = 16, width = 16, dpi = 300
 )
 
