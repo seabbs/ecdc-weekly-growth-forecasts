@@ -36,7 +36,7 @@ fits <- future.apply::future_lapply(
   r_forecast = TRUE,
   r_step = 1,
   keep_fit = TRUE,
-  horizon = 4,
+  horizon = 2,
   beta = c(-0.5, 0.25),
   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
   parallel_chains = 1,
