@@ -1,7 +1,7 @@
 on:
-  workflow_dispatch:
   schedule:
     - cron: '05 9 * * 7'  # Sunday at 9.05am
+  workflow_dispatch:
 name: forecast
 
 jobs:
