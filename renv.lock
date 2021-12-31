@@ -147,6 +147,13 @@
       "Repository": "RSPM",
       "Hash": "0a6a65d92bd45b47b94b84244b528d17"
     },
+    "curl": {
+      "Package": "curl",
+      "Version": "4.3.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "022c42d49c28e95d69ca60446dbabf88"
+    },
     "data.table": {
       "Package": "data.table",
       "Version": "1.14.2",
