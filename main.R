@@ -23,7 +23,7 @@ source(here("R", "format_forecasts.R"))
 source(here("R", "sample_decay.R"))
 
 # Get the data
-cases <- get_obs(weeks = 16)
+cases <- get_obs(weeks = 32)
 
 # Precompile the model
 mod <- fv_model(model = "model.stan", strains = 1, verbose = TRUE)
