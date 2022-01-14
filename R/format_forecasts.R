@@ -5,6 +5,7 @@ format_forecasts <- function(forecasts, forecast_date) {
   cols <- grep("q[1-9]", colnames(forecasts), value = TRUE)
   cols <- c("location", "location_name", "date", "horizon", cols)
   forecasts <- forecasts[, ..cols]
+  forecasts <- forecasts[, horizon := 1:.N, by = c("location")]
   forecasts <- forecast.vocs::quantiles_to_long(forecasts)
   forecasts <- forecasts[,
     .(

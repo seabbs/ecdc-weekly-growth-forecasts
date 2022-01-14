@@ -45,7 +45,7 @@ fits <- future.apply::future_lapply(
   iter_warmup = 500,
   iter_sampling = 1000,
   chains = 2,
-  adapt_delta = 0.95,
+  adapt_delta = 0.98,
   max_treedepth = 15,
   future.seed = TRUE,
   refresh = 0,
