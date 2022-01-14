@@ -26,7 +26,7 @@ source(here("R", "sample_decay.R"))
 cases <- get_obs(weeks = 16)
 
 # Precompile the model
-mod <- fv_model(model = "model.stan", strains = 1)
+mod <- fv_model(model = "model.stan", strains = 1, verbose = TRUE)
 
 # Set up parallel forecasting
 plan("callr", workers = 2)
@@ -37,14 +37,14 @@ fits <- future_lapply(
   forecast,
   fit = sample_decay,
   strains = 1,
-  overdispersion = TRUE,
+  overdispersion = FALSE,
   r_forecast = TRUE,
   r_step = 1,
   keep_fit = TRUE,
   horizon = 4,
-  beta = c(-0.5, 0.25),
+  beta = c(0, 0.25),
   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
-  parallel_chains = 2,
+  parallel_chains = 1,
   iter_warmup = 500,
   iter_sampling = 1000,
   chains = 2,

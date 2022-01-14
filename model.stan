@@ -60,7 +60,14 @@ transformed parameters {
   }
 
   // update case using initial cases, generation time and growth
-  mean_cases = cases_ar(init_cases, gt, exp(r), t); 
+  {
+    vector[t-1] R = exp(r);
+    mean_cases = rep_vector(0, t);
+    mean_cases[1] = init_cases[1];
+    for (i in 2:t_nots) {
+      mean_cases[i] = R[i - 1] * convolve_step(to_vector(X), gt, i - 1);
+    }
+  }
   rep_by_case = convolve(mean_cases, case_delay);
   rep_by_case = periodic_adjustment(rep_by_case, periodic, period_eff,
                                     period_sd);
@@ -123,12 +130,20 @@ model {
 generated quantities {
   int sim_cases[t];
   vector[output_loglik ? t_nots : 0] log_lik;
-
-  for (i in 1:t) {
+  vector[t-1] R = exp(r);
+  for (i in 1:t_nots) {
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(rep_by_case[i], phi[1]);
     }else{
       sim_cases[i] = poisson_rng(rep_by_case[i]);
+    }
+  }
+  for (i in (t_nots+1):t) {
+    real mcase = R[i - 1] * convolve_step(to_vector(sim_cases), gt, i - 1);
+    if (overdisp) {
+      sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
+    }else{
+      sim_cases[i] = poisson_rng(mcase);
     }
   }
 
