@@ -10,7 +10,7 @@ format_forecasts <- function(forecasts, forecast_date) {
   forecasts <- forecasts[,
     .(
       forecast_date = forecast_date,
-      target = paste0(horizon, " wk ahead inc cases"),
+      target = paste0(horizon, " wk ahead inc case"),
       target_end_date = date,
       location = location,
       type = "quantile",
