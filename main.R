@@ -37,7 +37,7 @@ fits <- future_lapply(
   forecast,
   fit = sample_decay,
   strains = 1,
-  overdispersion = FALSE,
+  overdispersion = TRUE,
   r_forecast = TRUE,
   r_step = 1,
   keep_fit = TRUE,
