@@ -53,6 +53,7 @@ transformed parameters {
   real phi[overdisp ? 1 : 0];
 
   diff = diff_ar(beta, r_scale * eta, eta_loc, t - 2);
+  diff[2:(t-2)] = diff[2:(t-2)] - diff[1:(t-3)];
   r[1] = r_init;
   for (s in 2:(t-1)) {
     r[s] = r_decay * r[s-1] + diff[s-1];

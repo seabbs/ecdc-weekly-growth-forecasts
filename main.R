@@ -33,7 +33,7 @@ plan("callr", workers = 2)
 
 # Make forecasts
 fits <- future_lapply(
-  split(cases, by = "location")[1],
+  split(cases, by = "location"),
   forecast,
   fit = sample_decay,
   strains = 1,
@@ -44,15 +44,13 @@ fits <- future_lapply(
   horizon = 4,
   beta = c(-0.5, 0.25),
   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
-  parallel_chains = 1,
+  parallel_chains = 2,
   iter_warmup = 500,
   iter_sampling = 1000,
   chains = 2,
   adapt_delta = 0.98,
   max_treedepth = 15,
-  future.seed = TRUE,
-  refresh = 0,
-  show_messages = TRUE
+  future.seed = TRUE
 )
 
 # merge fits and add location names
