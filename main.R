@@ -12,6 +12,11 @@ library(ggplot2)
 if (!dir.exists(here("figures"))) {
   dir.create(here("figures"), recursive = TRUE)
 }
+
+if (!dir.exists(here("logs"))) {
+  dir.create(here("logs"), recursive = TRUE)
+}
+
 unlink(here("data-processed", "epiforecasts-weeklygrowth"), recursive = TRUE)
 dir.create(
   here("data-processed", "epiforecasts-weeklygrowth"), recursive = TRUE
