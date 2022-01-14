@@ -140,6 +140,9 @@ generated quantities {
   }
   for (i in (t_nots+1):t) {
     real mcase = R[i - 1] * convolve_step(to_vector(sim_cases), gt, i - 1);
+    if (mcase > 5e6) {
+      mcase = 5e6;
+    }
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
     }else{
