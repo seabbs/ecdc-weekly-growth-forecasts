@@ -25,6 +25,11 @@ source(here("R", "sample_decay.R"))
 # Get the data
 cases <- get_obs(weeks = 64)
 
+# Set negative cases to last observed
+cases[, shifted_cases := shift(cases), by = "location"]
+cases[, cases := ifelse(cases < 0, shifted_cases, cases), by = "location"]
+cases[, shifted_cases := NULL]
+
 # Precompile the model
 mod <- fv_model(model = "model.stan", strains = 1, verbose = TRUE)
 
@@ -45,10 +50,10 @@ fits <- future_lapply(
   beta = c(0, 0.25),
   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
   parallel_chains = 1,
-  iter_warmup = 500,
+  iter_warmup = 1000,
   iter_sampling = 1000,
   chains = 2,
-  adapt_delta = 0.98,
+  adapt_delta = 0.99,
   max_treedepth = 15,
   future.seed = TRUE
 )
@@ -70,7 +75,7 @@ plot_cases <- plot(posterior, type = "cases", log = FALSE) +
 
 ggsave(plot = plot_cases,
        filename = here::here("figures", "cases.png"),
-       height = 16, width = 16, dpi = 300
+       height = 24, width = 24, dpi = 300
 )
 
 plot_log_cases <- plot(posterior, type = "cases", log = TRUE) +
@@ -79,7 +84,7 @@ plot_log_cases <- plot(posterior, type = "cases", log = TRUE) +
 
 ggsave(plot = plot_log_cases,
        filename = here::here("figures", "log-cases.png"),
-       height = 16, width = 16, dpi = 300
+       height = 24, width = 24, dpi = 300
 )
 
 # Plot the forecast growth rate
@@ -89,7 +94,7 @@ plot_growth <- plot(posterior, type = "growth") +
 
 ggsave(plot = plot_growth,
        filename = here::here("figures", "growth.png"),
-       height = 16, width = 16, dpi = 300
+       height = 24, width = 24, dpi = 300
 )
 
 # Format output for the hub
@@ -102,4 +107,20 @@ fwrite(
   here("data-processed", "epiforecasts-weeklygrowth",
        paste0(forecast_date, "-epiforecasts-weeklygrowth.csv")
   )
+)
+
+
+# save any forecasts that errored
+if (nrow(fits[is.null(fit)]) > 0) {
+  fwrite(
+    fits[is.null(fit)],
+    here("logs", "failed-forecasts.csv")
+  )
+}
+
+class(fits) <- c("fv_forecast", class(fits))
+fwrite(
+  summary(fits, target = "diagnostics")[,
+   c("fit", "data", "fit_args", "voc_scale", "r_init", "error") := NULL][],
+  here("logs", "diagnostics.csv")
 )

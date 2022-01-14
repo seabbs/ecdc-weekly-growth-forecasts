@@ -33,12 +33,19 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: forecast
-          retention-days: 5
+          retention-days: 14
           path: data-processed
 
       - name: Upload figures
         uses: actions/upload-artifact@v2
         with:
           name: figures
-          retention-days: 5
+          retention-days: 14
           path: figures
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          retention-days: 14
+          path: logs
