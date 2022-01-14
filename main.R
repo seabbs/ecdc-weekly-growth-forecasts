@@ -73,6 +73,15 @@ ggsave(plot = plot_cases,
        height = 16, width = 16, dpi = 300
 )
 
+plot_log_cases <- plot(posterior, type = "cases", log = TRUE) +
+  facet_wrap(~location_name, scales = "free_y") +
+  theme(legend.position = "none")
+
+ggsave(plot = plot_log_cases,
+       filename = here::here("figures", "log-cases.png"),
+       height = 16, width = 16, dpi = 300
+)
+
 # Plot the forecast growth rate
 plot_growth <- plot(posterior, type = "growth") +
   facet_wrap(~location_name, scales = "free_y") +
