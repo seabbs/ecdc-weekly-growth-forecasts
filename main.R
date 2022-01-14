@@ -2,6 +2,7 @@
 library(forecast.vocs)
 library(data.table)
 library(future)
+library(future.apply)
 library(future.callr)
 library(here)
 library(callr)
@@ -19,6 +20,7 @@ dir.create(
 # Load functions
 source(here("R", "get_obs.R"))
 source(here("R", "format_forecasts.R"))
+source(here("R", "sample_decay.R"))
 
 # Get the data
 cases <- get_obs(weeks = 16)
@@ -30,9 +32,10 @@ mod <- fv_model(model = "model.stan", strains = 1)
 plan("callr", workers = 2)
 
 # Make forecasts
-fits <- future.apply::future_lapply(
-  split(cases, by = "location"),
+fits <- future_lapply(
+  split(cases, by = "location")[1],
   forecast,
+  fit = sample_decay,
   strains = 1,
   overdispersion = TRUE,
   r_forecast = TRUE,
