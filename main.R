@@ -80,7 +80,7 @@ plot_cases <- plot(posterior, type = "cases", log = FALSE) +
 
 ggsave(plot = plot_cases,
        filename = here::here("figures", "cases.png"),
-       height = 24, width = 24, dpi = 300
+       height = 36, width = 36, dpi = 300
 )
 
 plot_log_cases <- plot(posterior, type = "cases", log = TRUE) +
@@ -89,7 +89,7 @@ plot_log_cases <- plot(posterior, type = "cases", log = TRUE) +
 
 ggsave(plot = plot_log_cases,
        filename = here::here("figures", "log-cases.png"),
-       height = 24, width = 24, dpi = 300
+       height = 36, width = 36, dpi = 300
 )
 
 # Plot the forecast growth rate
@@ -99,7 +99,7 @@ plot_growth <- plot(posterior, type = "growth") +
 
 ggsave(plot = plot_growth,
        filename = here::here("figures", "growth.png"),
-       height = 24, width = 24, dpi = 300
+       height = 36, width = 36, dpi = 300
 )
 
 # Format output for the hub
