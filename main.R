@@ -24,7 +24,7 @@ source(here("R", "format_forecasts.R"))
 cases <- get_obs(weeks = 16)
 
 # Precompile the model
-mod <- fv_model(strains = 1)
+mod <- fv_model(model = "model.stan", strains = 1)
 
 # Set up parallel forecasting
 plan("callr", workers = 2)
@@ -38,7 +38,7 @@ fits <- future.apply::future_lapply(
   r_forecast = TRUE,
   r_step = 1,
   keep_fit = TRUE,
-  horizon = 2,
+  horizon = 4,
   beta = c(-0.5, 0.25),
   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
   parallel_chains = 1,
