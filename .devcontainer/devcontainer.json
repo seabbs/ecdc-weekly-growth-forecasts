@@ -2,11 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/r
 {
 	"name": "ecdc-weekly-growth-forecasts",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": ".."
-
-	},
+	"image": "ghcr.io/epiforecasts/ecdc-weekly-growth-forecasts:main",
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
