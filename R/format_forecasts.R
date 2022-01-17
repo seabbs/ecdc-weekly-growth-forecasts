@@ -20,7 +20,7 @@ format_forecasts <- function(forecasts, forecast_date, point = FALSE) {
   ]
   if (point) {
     point <- forecasts[quantile == 0.5]
-    point <- point[. type := "point"][, quantile = NA]
+    point <- point[, type := "point"][, quantile = NA]
     forecasts <- rbind(forecasts, point)
   }
   return(forecasts[])
