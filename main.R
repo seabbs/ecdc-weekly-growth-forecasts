@@ -104,7 +104,7 @@ ggsave(plot = plot_growth,
 
 # Format output for the hub
 forecast_date <- max(cases$date) + 1
-forecasts <- format_forecasts(posterior, forecast_date)
+forecasts <- format_forecasts(posterior, forecast_date, point = TRUE)
 
 # Save forecasts
 fwrite(

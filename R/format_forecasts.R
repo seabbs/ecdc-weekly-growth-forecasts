@@ -1,4 +1,4 @@
-format_forecasts <- function(forecasts, forecast_date) {
+format_forecasts <- function(forecasts, forecast_date, point = FALSE) {
   forecasts <- forecast.vocs::fv_extract_forecast(
     posterior
   )[value_type == "cases"]
@@ -15,8 +15,13 @@ format_forecasts <- function(forecasts, forecast_date) {
       location = location,
       type = "quantile",
       quantile,
-      value = prediction
+      value = as.integer(prediction)
     )
   ]
+  if (point) {
+    point <- forecasts[quantile == 0.5]
+    point <- point[. type := "point"][, quantile = NA]
+    forecasts <- rbind(forecasts, point)
+  }
   return(forecasts[])
 }
