@@ -1,15 +1,27 @@
+impute_negative_cases <- function(cases) {
+  # Set negative cases to last observed
+  cases[, shifted_cases := shift(cases), by = "location"]
+  cases[, cases := ifelse(cases < 0, shifted_cases, cases), by = "location"]
+  cases[, shifted_cases := NULL]
+  return(cases[])
+}
+
+make_weekly <- function(cases) {
+  # Summarise to weekly cases starting on Saturday to Sync with the
+  # forecast hubs
+  cases[, cases := data.table::frollsum(cases, n = 7), by = c("location_name")]
+  # Keep only Saturdays
+  cases <- cases[weekdays(date) %in% "Saturday"]
+  return(cases[])
+}
+
 get_obs <- function(weeks = 12) {
   cases <- data.table::fread("https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/JHU/truth_JHU-Incident%20Cases.csv") # nolint
   # Format date
   cases[, date := as.Date(date)]
   # Order data by date and location
   data.table::setkey(cases, location_name, date)
-  # Summarise to weekly cases starting on Saturday to Sync with the
-  # forecast hubs
-  cases[, cases := data.table::frollsum(value, n = 7), by = c("location_name")]
-  # Keep only Saturdays
-  cases <- cases[weekdays(date) %in% "Saturday"]
-  cases[, value := NULL]
+  cases[, cases := value][, value := NULL]
   cases[, cases_available := date]
   cases[, seq_available := date]
   cases[, c("seq_total", "seq_voc", "share_voc") := 0]

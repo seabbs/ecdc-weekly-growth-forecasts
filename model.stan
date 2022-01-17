@@ -38,6 +38,7 @@ parameters {
   real<lower = 0> r_scale;
   real<lower = -1, upper = 1> beta;
   real<lower = 0, upper = 1> r_decay;
+  real r_mv;
   vector[eta_n] eta;
   vector[1] init_cases;
   vector[period > 1 ? 1 : 0] period_sd;
@@ -56,7 +57,10 @@ transformed parameters {
   diff[2:(t-2)] = diff[2:(t-2)] - diff[1:(t-3)];
   r[1] = r_init;
   for (s in 2:(t-1)) {
-    r[s] = r_decay * r[s-1] + diff[s-1];
+    r[s] = r_decay * r[s-1] + diff[s-1] + diff[s-7];
+    if (s > 7) {
+      r[s] = r_mv * diff[s-7];
+    }
   }
 
   // update case using initial cases, generation time and growth
@@ -101,6 +105,7 @@ model {
   r_init ~ normal(r_init_mean, r_init_sd);
   r_scale ~ normal(0, 0.2) T[0,];
   r_decay ~ beta(3, 1);
+  r_mv ~ normal(0, 1);
 
   // random walk priors
   beta ~ normal(beta_mean, beta_sd);

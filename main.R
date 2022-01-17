@@ -29,11 +29,8 @@ source(here("R", "sample_decay.R"))
 
 # Get the data
 cases <- get_obs(weeks = 64)
-
-# Set negative cases to last observed
-cases[, shifted_cases := shift(cases), by = "location"]
-cases[, cases := ifelse(cases < 0, shifted_cases, cases), by = "location"]
-cases[, shifted_cases := NULL]
+#cases <- make_weekly(cases)
+cases <- impute_negative_cases(cases)
 
 # Precompile the model
 mod <- fv_model(model = "model.stan", strains = 1, verbose = TRUE)
@@ -76,7 +73,8 @@ posterior <- unnest_posterior(fits)
 # Plot the case forecasts
 plot_cases <- plot(posterior, type = "cases", log = FALSE) +
   facet_wrap(~location_name, scales = "free_y") +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %d")
 
 ggsave(plot = plot_cases,
        filename = here::here("figures", "cases.png"),
@@ -85,7 +83,8 @@ ggsave(plot = plot_cases,
 
 plot_log_cases <- plot(posterior, type = "cases", log = TRUE) +
   facet_wrap(~location_name, scales = "free_y") +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %d")
 
 ggsave(plot = plot_log_cases,
        filename = here::here("figures", "log-cases.png"),
@@ -95,7 +94,8 @@ ggsave(plot = plot_log_cases,
 # Plot the forecast growth rate
 plot_growth <- plot(posterior, type = "growth") +
   facet_wrap(~location_name, scales = "free_y") +
-  labs(fill = NULL)
+  labs(fill = NULL) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %d")
 
 ggsave(plot = plot_growth,
        filename = here::here("figures", "growth.png"),
