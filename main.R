@@ -28,7 +28,7 @@ source(here("R", "format_forecasts.R"))
 source(here("R", "sample_decay.R"))
 
 # Get the data
-cases <- get_obs(weeks = 64)
+cases <- get_obs(weeks = 16)
 #cases <- make_weekly(cases)
 cases <- impute_negative_cases(cases)
 
