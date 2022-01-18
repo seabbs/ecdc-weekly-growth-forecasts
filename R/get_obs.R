@@ -17,3 +17,8 @@ get_obs <- function(weeks = 12) {
   cases <- cases[date >= (max(date) - weeks * 7)]
   return(cases[])
 }
+
+get_population <- function() {
+  pop <- data.table::fread("https://raw.githubusercontent.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/main/data-locations/locations_eu.csv") # nolint
+  return(pop[])
+}

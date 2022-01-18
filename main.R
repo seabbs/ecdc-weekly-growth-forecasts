@@ -106,6 +106,11 @@ ggsave(plot = plot_growth,
 forecast_date <- max(cases$date) + 1
 forecasts <- format_forecasts(posterior, forecast_date, point = TRUE)
 
+
+# Adjust forecasts greater than the population
+pop <- get_population()
+forecasts <- adjust_to_max_pop(forecasts, pop)
+
 # Save forecasts
 fwrite(
   forecasts,

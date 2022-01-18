@@ -37,7 +37,7 @@ parameters {
   real r_init;
   real<lower = 0> r_scale;
   real<lower = -1, upper = 1> beta;
-  real<lower = 0, upper = 1> r_decay;
+  vector<lower = 0, upper = 1>[2] r_decay;
   vector[eta_n] eta;
   vector[1] init_cases;
   vector[period > 1 ? 1 : 0] period_sd;
@@ -55,8 +55,16 @@ transformed parameters {
   diff = diff_ar(beta, r_scale * eta, eta_loc, t - 2);
   diff[2:(t-2)] = diff[2:(t-2)] - diff[1:(t-3)];
   r[1] = r_init;
-  for (s in 2:(t-1)) {
-    r[s] = r_decay * r[s-1] + diff[s-1];
+  {
+    real eff_decay;
+    for (s in 2:(t-1)) {
+      if (r[s-1] <= 0) {
+        eff_decay = r_decay[1];
+      }else{
+        eff_decay = r_decay[2];
+      }
+      r[s] = eff_decay * r[s-1] + diff[s-1];
+    }
   }
 
   // update case using initial cases, generation time and growth
