@@ -29,7 +29,7 @@ format_forecasts <- function(forecasts, forecast_date, point = FALSE) {
 adjust_to_max_pop <- function(forecasts, population) {
   population <- population[,c("location", "population")]
   forecasts <- merge(forecasts, population, by = "location")
-  forecasts[value > population, value := population]
+  forecasts[value >= population, value := population - 1]
   forecasts[, population := NULL]
   return(forecasts[])
 }
