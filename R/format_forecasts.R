@@ -23,5 +23,13 @@ format_forecasts <- function(forecasts, forecast_date, point = FALSE) {
     point <- point[, type := "point"][, quantile := NA]
     forecasts <- rbind(forecasts, point)
   }
+  
+  # check against population
+  pop <- data.table::fread("https://raw.githubusercontent.com/covid19-forecast-hub-europe/covid19-forecast-hub-europe/main/data-locations/locations_eu.csv") # nolint
+  pop <- pop[,c("location", "population")]
+  forecasts <- merge(forecasts, pop, by="location")
+  forecasts <- forecasts[, value := ifelse(value > population, population, value)]
+  forecasts$population <- NULL
+  
   return(forecasts[])
 }
