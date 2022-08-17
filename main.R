@@ -31,7 +31,7 @@ source(here("R", "sample_decay.R"))
 cases <- get_obs(weeks = 64)
 
 # Set negative cases to last observed
-cases[, shifted_cases := shift(cases), by = "location"]
+cases[, shifted_cases := shift(cases, fill = 0), by = "location"]
 cases[, cases := ifelse(cases < 0, shifted_cases, cases), by = "location"]
 cases[, shifted_cases := NULL]
 
