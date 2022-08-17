@@ -31,9 +31,10 @@ source(here("R", "sample_decay.R"))
 cases <- get_obs(weeks = 64)
 
 # Set negative cases to last observed
-cases[, shifted_cases := shift(cases, fill = 0), by = "location"]
+cases[, shifted_cases := shift(cases, fill = NA), by = "location"]
 cases[, cases := ifelse(cases < 0, shifted_cases, cases), by = "location"]
 cases[, shifted_cases := NULL]
+cases <- cases[!is.na(cases)]
 
 # Precompile the model
 mod <- fv_model(model = "model.stan", strains = 1, verbose = TRUE)
