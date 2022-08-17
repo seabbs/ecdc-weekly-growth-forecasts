@@ -106,6 +106,8 @@ ggsave(plot = plot_growth,
 forecast_date <- max(cases$date) + 1
 forecasts <- format_forecasts(posterior, forecast_date, point = TRUE)
 
+# Exclude forecasts that are missing and warn
+forecasts <- exclude_missing_forecasts(forecasts)
 
 # Adjust forecasts greater than the population
 pop <- get_population()

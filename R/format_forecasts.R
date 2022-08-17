@@ -33,3 +33,14 @@ adjust_to_max_pop <- function(forecasts, population) {
   forecasts[, population := NULL]
   return(forecasts[])
 }
+
+exclude_missing_forecasts <- function(forecasts) {
+
+  miss_locations <- forecasts[type %in% "point"][is.na(value)]
+  miss_locations <- unique(miss_locations[, location])
+  if (length(miss_locations) > 0){
+    warning("Forecasts are missing for the following locations: ", paste(miss_locations, collapse = ", "))
+    forecasts <- forecasts[!(location %in% miss_locations)]
+  }
+  return(forecasts[])
+}
