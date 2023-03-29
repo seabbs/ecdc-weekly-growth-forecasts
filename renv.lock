@@ -88,10 +88,8 @@
     },
     "bayesplot": {
       "Package": "bayesplot",
-      "Version": "1.8.1",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Hash": "0a8b771b1b255fc55f271ae49e671afc"
+      "Version": "1.10.0",
+      "Source": "Repository"
     },
     "callr": {
       "Package": "callr",
@@ -470,10 +468,8 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.14.0",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Hash": "30e5eba91b67f7f4d75d31de14bbfbdc"
+      "Version": "0.17.2",
+      "Source": "Repository"
     },
     "reshape2": {
       "Package": "reshape2",

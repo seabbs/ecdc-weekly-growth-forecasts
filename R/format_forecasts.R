@@ -1,16 +1,21 @@
-format_forecasts <- function(forecasts, forecast_date, point = FALSE) {
+format_forecasts <- function(forecasts, forecast_date, type = "cases", point = FALSE, min_horizon = -3, max_horizon = 4) {
+  type <- match.arg(type, c("cases", "hospitalizations"))
+  hub_label <- c(cases = "inc case", hospitalizations = "inc hosp")
+
   forecasts <- forecast.vocs::fv_extract_forecast(
     posterior
   )[value_type == "cases"]
   cols <- grep("q[1-9]", colnames(forecasts), value = TRUE)
   cols <- c("location", "location_name", "date", "horizon", cols)
   forecasts <- forecasts[, ..cols]
-  forecasts <- forecasts[, horizon := 1:.N, by = c("location")]
+  forecasts <- forecasts[, horizon := ceiling((date - forecast_date) / 7),
+                         by = c("location")]
+  forecasts <- forecasts[horizon >= min_horizon & horizon <= max_horizon]
   forecasts <- forecast.vocs::quantiles_to_long(forecasts)
   forecasts <- forecasts[,
     .(
       forecast_date = forecast_date,
-      target = paste0(horizon, " wk ahead inc case"),
+      target = paste0(horizon, " wk ahead inc ", hub_label[type]),
       target_end_date = date,
       location = location,
       type = "quantile",
