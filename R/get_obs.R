@@ -1,15 +1,16 @@
-get_obs <- function(weeks = 12) {
-  cases <- data.table::fread("https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/JHU/truth_JHU-Incident%20Cases.csv") # nolint
+get_obs <- function(weeks = 12, type = "cases") {
+  type <- match.arg(type, choices = c("cases", "hospitalizations"))
+  if (type == "cases") {
+    url <- "https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/ECDC/truncated_ECDC-Incident%20Cases.csv" # nolint
+  } else if (type == "hospitalizations") {
+    url <- "https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/OWID/truncated_OWID-Incident%20Hospitalizations.csv" # nolint
+  }
+  cases <- data.table::fread(url)
   # Format date
   cases[, date := as.Date(date)]
+  setnames(cases, "value", "cases")
   # Order data by date and location
   data.table::setkey(cases, location_name, date)
-  # Summarise to weekly cases starting on Saturday to Sync with the
-  # forecast hubs
-  cases[, cases := data.table::frollsum(value, n = 7), by = c("location_name")]
-  # Keep only Saturdays
-  cases <- cases[weekdays(date) %in% "Saturday"]
-  cases[, value := NULL]
   cases[, cases_available := date]
   cases[, seq_available := date]
   cases[, c("seq_total", "seq_voc", "share_voc") := 0]
