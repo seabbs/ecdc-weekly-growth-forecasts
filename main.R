@@ -20,7 +20,7 @@ dir.create(
 )
 
 forecast_date <- lubridate::floor_date(
-  lubridate::today(), unit = "week", week_start = 1
+  lubridate::today() + 2, unit = "week", week_start = 1
 )
 
  # Load functions
