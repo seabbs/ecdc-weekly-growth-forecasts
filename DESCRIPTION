@@ -21,6 +21,7 @@ Imports:
   future,
   future.callr,
   ggplot2,
-  here
+  here,
+  lubridate
 Remotes:
   epiforecasts/forecast.vocs
