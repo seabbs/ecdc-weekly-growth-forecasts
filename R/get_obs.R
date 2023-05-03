@@ -1,9 +1,11 @@
 get_obs <- function(weeks = 12, type = "cases") {
-  type <- match.arg(type, choices = c("cases", "hospitalizations"))
+  type <- match.arg(type, choices = c("cases", "hospitalizations", "deaths"))
   if (type == "cases") {
     url <- "https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/ECDC/truncated_ECDC-Incident%20Cases.csv" # nolint
   } else if (type == "hospitalizations") {
     url <- "https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/OWID/truncated_OWID-Incident%20Hospitalizations.csv" # nolint
+  } else if (type == "deaths") {
+    url <- "https://raw.githubusercontent.com/epiforecasts/covid19-forecast-hub-europe/main/data-truth/ECDC/truncated_ECDC-Incident%20Deaths.csv" # nolint
   }
   cases <- data.table::fread(url)
   # Format date

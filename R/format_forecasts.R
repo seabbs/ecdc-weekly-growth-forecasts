@@ -1,6 +1,6 @@
 format_forecasts <- function(forecasts, forecast_date, type = "cases", point = FALSE, min_horizon = -3, max_horizon = 4) {
-  type <- match.arg(type, c("cases", "hospitalizations"))
-  hub_label <- c(cases = "case", hospitalizations = "hosp")
+  type <- match.arg(type, c("cases", "hospitalizations", "deaths"))
+  hub_label <- c(cases = "case", hospitalizations = "hosp", "death")
 
   forecasts <- forecast.vocs::fv_extract_forecast(
     posterior
