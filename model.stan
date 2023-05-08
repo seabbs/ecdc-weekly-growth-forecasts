@@ -8,7 +8,7 @@ functions {
 data {
   int t;
   int t_nots;
-  int X[t_nots];
+  array[t_nots] int X;
   real r_init_mean;
   real r_init_sd;
   int likelihood;
@@ -16,11 +16,11 @@ data {
   int overdisp;
   int debug;
   int eta_n;
-  int eta_loc[t - 2];
+  array[t - 2] int eta_loc;
   real beta_mean;
   real beta_sd;
   int period;
-  int periodic[t];
+  array[t] int periodic;
 }
 
 transformed data {
@@ -42,7 +42,7 @@ parameters {
   vector[1] init_cases;
   vector[period > 1 ? 1 : 0] period_sd;
   vector[period > 1 ? period : 0] period_eff;
-  real<lower = 0> sqrt_phi[overdisp ? 1 : 0];
+  array[overdisp ? 1 : 0] real<lower = 0> sqrt_phi;
 }
 
 transformed parameters {
@@ -50,7 +50,7 @@ transformed parameters {
   vector[t - 1] r;
   vector<lower = 0>[t] mean_cases;
   vector<lower = 0>[t] rep_by_case;
-  real phi[overdisp ? 1 : 0];
+  array[overdisp ? 1 : 0] real phi;
 
   diff = diff_ar(beta, r_scale * eta, eta_loc, t - 2);
   diff[2:(t-2)] = diff[2:(t-2)] - diff[1:(t-3)];
@@ -136,7 +136,7 @@ model {
 }
 
 generated quantities {
-  int sim_cases[t];
+  array[t] int sim_cases;
   vector[output_loglik ? t_nots : 0] log_lik;
   vector[t-1] R = exp(r);
   for (i in 1:t_nots) {
@@ -146,6 +146,7 @@ generated quantities {
       sim_cases[i] = poisson_rng(rep_by_case[i]);
     }
   }
+
   for (i in (t_nots+1):t) {
     real mcase = R[i - 1] * convolve_step(to_vector(sim_cases), gt, i - 1);
     if (mcase > 5e6) {
