@@ -37,7 +37,7 @@ parameters {
   real r_init;
   real<lower = 0> r_scale;
   real<lower = -1, upper = 1> beta;
-  vector<lower = 0, upper = 1>[2] r_decay;
+  real<lower = 0> gamma;
   vector[eta_n] eta;
   vector[1] init_cases;
   vector[period > 1 ? 1 : 0] period_sd;
@@ -48,12 +48,10 @@ parameters {
 transformed parameters {
   vector[t - 2] diff;
   vector[t - 1] r;
-  vector<lower = 0>[t] mean_cases;
-  vector<lower = 0>[t] rep_by_case;
+  vector<lower = 0>[t_nots] mean_cases;
+  vector<lower = 0>[t_nots] rep_by_case;
   array[overdisp ? 1 : 0] real phi;
 
-  diff = diff_ar(beta, r_scale * eta, eta_loc, t - 2);
-  diff[2:(t-2)] = diff[2:(t-2)] - diff[1:(t-3)];
   r[1] = r_init;
   {
     real eff_decay;
@@ -73,7 +71,11 @@ transformed parameters {
     mean_cases = rep_vector(0, t);
     mean_cases[1] = init_cases[1];
     for (i in 2:t_nots) {
-      mean_cases[i] = R[i - 1] * convolve_step(to_vector(X), gt, i - 1);
+      mean_cases[i] = exp(r[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
+      r[i] = r[i-1] - gamma * mean_cases[i] + eta[i - 1] * r_scale;
+      if (i > 2) {
+        r[i] += beta * (r[i-1] + r[i - 2]);
+      }
     }
   }
   rep_by_case = convolve(mean_cases, case_delay);
@@ -108,11 +110,13 @@ model {
   // growth priors
   r_init ~ normal(r_init_mean, r_init_sd);
   r_scale ~ normal(0, 0.2) T[0,];
-  r_decay ~ beta(3, 1);
 
   // random walk priors
   beta ~ normal(beta_mean, beta_sd);
   eta ~ std_normal();
+  
+  // damping priors
+  gamma ~ normal(0, 0.1) T[0,];
 
   // observation model priors
   if (overdisp) {
@@ -128,9 +132,9 @@ model {
   // observation model 
   if (likelihood) {
     if (overdisp){
-      X ~ neg_binomial_2(rep_by_case[1:t_nots], phi[1]);
+      X ~ neg_binomial_2(rep_by_case, phi[1]);
     }else{
-      X ~ poisson(rep_by_case[1:t_nots]);
+      X ~ poisson(rep_by_case);
     }
   }
 }
@@ -138,7 +142,7 @@ model {
 generated quantities {
   array[t] int sim_cases;
   vector[output_loglik ? t_nots : 0] log_lik;
-  vector[t-1] R = exp(r);
+  vector[t-1] R;
   for (i in 1:t_nots) {
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(rep_by_case[i], phi[1]);
@@ -146,6 +150,8 @@ generated quantities {
       sim_cases[i] = poisson_rng(rep_by_case[i]);
     }
   }
+
+  R[1:t_nots] = exp(r);
 
   for (i in (t_nots+1):t) {
     real mcase = R[i - 1] * convolve_step(to_vector(sim_cases), gt, i - 1);
@@ -156,6 +162,9 @@ generated quantities {
       sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
     }else{
       sim_cases[i] = poisson_rng(mcase);
+    }
+    if (i < t) {
+      R[i] = r_decay[2] * R[i - 1] + diff[i - 1];
     }
   }
 
