@@ -368,15 +368,15 @@
     },
     "forecast.vocs": {
       "Package": "forecast.vocs",
-      "Version": "0.0.9.7000",
+      "Version": "0.1.0",
       "Source": "GitHub",
       "RemoteType": "github",
-      "Remotes": "stan-dev/cmdstanr",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "forecast.vocs",
       "RemoteUsername": "epiforecasts",
+      "RemoteRepo": "forecast.vocs",
       "RemoteRef": "HEAD",
-      "RemoteSha": "0fed1c9310e71765aacc21ea30cdb1d401afa561",
+      "RemoteSha": "d9fc5791e2dc9fa450bd1017dd366022dd9ce677",
+      "RemoteHost": "api.github.com",
+      "Remotes": "stan-dev/cmdstanr",
       "Requirements": [
         "R",
         "bayesplot",
@@ -389,7 +389,7 @@
         "rstan",
         "scales"
       ],
-      "Hash": "3437e2b73ade5143dfd7ee3fcd8cbd46"
+      "Hash": "4c90412c9b447d611ee1fe4b89c74855"
     },
     "future": {
       "Package": "future",
