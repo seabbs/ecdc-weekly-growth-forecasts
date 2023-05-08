@@ -8,7 +8,7 @@ functions {
 data {
   int t;
   int t_nots;
-  int X[t_nots];
+  array[t_nots] int X;
   real r_init_mean;
   real r_init_sd;
   int likelihood;
@@ -16,11 +16,11 @@ data {
   int overdisp;
   int debug;
   int eta_n;
-  int eta_loc[t - 2];
+  array[t - 2] int eta_loc;
   real beta_mean;
   real beta_sd;
   int period;
-  int periodic[t];
+  array[t] int periodic;
 }
 
 transformed data {
@@ -37,12 +37,11 @@ parameters {
   real r_init;
   real<lower = 0> r_scale;
   real<lower = -1, upper = 1> beta;
-  vector<lower = 0, upper = 1>[2] r_decay;
   vector[eta_n] eta;
   vector[1] init_cases;
   vector[period > 1 ? 1 : 0] period_sd;
   vector[period > 1 ? period : 0] period_eff;
-  real<lower = 0> sqrt_phi[overdisp ? 1 : 0];
+  array[overdisp ? 1 : 0] real<lower = 0> sqrt_phi;
 }
 
 transformed parameters {
@@ -50,32 +49,14 @@ transformed parameters {
   vector[t - 1] r;
   vector<lower = 0>[t] mean_cases;
   vector<lower = 0>[t] rep_by_case;
-  real phi[overdisp ? 1 : 0];
+  array[overdisp ? 1 : 0] real phi;
 
   diff = diff_ar(beta, r_scale * eta, eta_loc, t - 2);
-  diff[2:(t-2)] = diff[2:(t-2)] - diff[1:(t-3)];
-  r[1] = r_init;
-  {
-    real eff_decay;
-    for (s in 2:(t-1)) {
-      if (r[s-1] <= 0) {
-        eff_decay = r_decay[1];
-      }else{
-        eff_decay = r_decay[2];
-      }
-      r[s] = eff_decay * r[s-1] + diff[s-1];
-    }
-  }
+  r = rep_vector(r_init, t - 1);
+  r[2:(t-1)] = r[2:(t-1)] + diff;
 
   // update case using initial cases, generation time and growth
-  {
-    vector[t-1] R = exp(r);
-    mean_cases = rep_vector(0, t);
-    mean_cases[1] = init_cases[1];
-    for (i in 2:t_nots) {
-      mean_cases[i] = R[i - 1] * convolve_step(to_vector(X), gt, i - 1);
-    }
-  }
+  mean_cases = cases_ar(init_cases, gt, exp(r), t); 
   rep_by_case = convolve(mean_cases, case_delay);
   rep_by_case = periodic_adjustment(rep_by_case, periodic, period_eff,
                                     period_sd);
@@ -108,8 +89,7 @@ model {
   // growth priors
   r_init ~ normal(r_init_mean, r_init_sd);
   r_scale ~ normal(0, 0.2) T[0,];
-  r_decay ~ beta(3, 1);
-
+  
   // random walk priors
   beta ~ normal(beta_mean, beta_sd);
   eta ~ std_normal();
@@ -136,25 +116,14 @@ model {
 }
 
 generated quantities {
-  int sim_cases[t];
+  array[t] int sim_cases;
   vector[output_loglik ? t_nots : 0] log_lik;
-  vector[t-1] R = exp(r);
-  for (i in 1:t_nots) {
+
+  for (i in 1:t) {
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(rep_by_case[i], phi[1]);
     }else{
       sim_cases[i] = poisson_rng(rep_by_case[i]);
-    }
-  }
-  for (i in (t_nots+1):t) {
-    real mcase = R[i - 1] * convolve_step(to_vector(sim_cases), gt, i - 1);
-    if (mcase > 5e6) {
-      mcase = 5e6;
-    }
-    if (overdisp) {
-      sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
-    }else{
-      sim_cases[i] = poisson_rng(mcase);
     }
   }
 
