@@ -47,20 +47,20 @@ parameters {
 
 transformed parameters {
   vector[t - 2] diff;
-  vector[t - 1] r;
+  vector[t - 1] r_est;
   vector<lower = 0>[t_nots] mean_cases;
   vector<lower = 0>[t_nots] rep_by_case;
   array[overdisp ? 1 : 0] real phi;
 
-  r[1] = r_init;
+  r_est[1] = r_init;
   // update case using initial cases, generation time and growth
   mean_cases = rep_vector(0, t);
   mean_cases[1] = init_cases[1];
   for (i in 2:t_nots) {
-    mean_cases[i] = exp(r[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
-    r[i] = r[i-1] - gamma * mean_cases[i] + eta[i - 1] * r_scale;
+    mean_cases[i] = exp(r_est[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
+    r_est[i] = r_est[i-1] - gamma * mean_cases[i] + eta[i - 1] * r_scale;
     if (i > 2) {
-      r[i] += beta * (r[i - 1] + r[i - 2]);
+      r_est[i] += beta * (r[i - 1] + r[i - 2]);
     }
   }
   rep_by_case = convolve(mean_cases, case_delay);
@@ -149,7 +149,7 @@ generated quantities {
       mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
     }
     mcase = exp(r[i - 1]) * mcase;
-    r[i] = r[i-1] - gamma * mean_cases[i] + eta_rng * r_scale;
+    r[i] = r[i-1] - gamma * lagged_mcase + eta_rng * r_scale;
     if (i > 2) {
       r[i] += beta * (r[i - 1] + r[i - 2]);
     }
