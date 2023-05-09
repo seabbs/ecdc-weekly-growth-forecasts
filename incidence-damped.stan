@@ -53,29 +53,14 @@ transformed parameters {
   array[overdisp ? 1 : 0] real phi;
 
   r[1] = r_init;
-  {
-    real eff_decay;
-    for (s in 2:(t-1)) {
-      if (r[s-1] <= 0) {
-        eff_decay = r_decay[1];
-      }else{
-        eff_decay = r_decay[2];
-      }
-      r[s] = eff_decay * r[s-1] + diff[s-1];
-    }
-  }
-
   // update case using initial cases, generation time and growth
-  {
-    vector[t-1] R = exp(r);
-    mean_cases = rep_vector(0, t);
-    mean_cases[1] = init_cases[1];
-    for (i in 2:t_nots) {
-      mean_cases[i] = exp(r[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
-      r[i] = r[i-1] - gamma * mean_cases[i] + eta[i - 1] * r_scale;
-      if (i > 2) {
-        r[i] += beta * (r[i-1] + r[i - 2]);
-      }
+  mean_cases = rep_vector(0, t);
+  mean_cases[1] = init_cases[1];
+  for (i in 2:t_nots) {
+    mean_cases[i] = exp(r[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
+    r[i] = r[i-1] - gamma * mean_cases[i] + eta[i - 1] * r_scale;
+    if (i > 2) {
+      r[i] += beta * (r[i - 1] + r[i - 2]);
     }
   }
   rep_by_case = convolve(mean_cases, case_delay);
@@ -142,7 +127,8 @@ model {
 generated quantities {
   array[t] int sim_cases;
   vector[output_loglik ? t_nots : 0] log_lik;
-  vector[t-1] R;
+  vector[t - 1] r;
+  vector[t - 1] R;
   for (i in 1:t_nots) {
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(rep_by_case[i], phi[1]);
@@ -150,23 +136,26 @@ generated quantities {
       sim_cases[i] = poisson_rng(rep_by_case[i]);
     }
   }
-
-  R[1:t_nots] = exp(r);
-
+  // update case using initial cases, generation time and growth
+  r[1:t_nots] = r_est;
   for (i in (t_nots+1):t) {
-    real mcase = R[i - 1] * convolve_step(to_vector(sim_cases), gt, i - 1);
-    if (mcase > 5e6) {
-      mcase = 5e6;
+    real mcase;
+    real lagged_mcase;
+    real eta_rng = std_normal_rng();
+
+    if (i == t_nots + 1) {
+      mcase = convolve_step(to_vector(X), gt, i - 1);
+    } else {
+      mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
     }
-    if (overdisp) {
-      sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
-    }else{
-      sim_cases[i] = poisson_rng(mcase);
+    mcase = exp(r[i - 1]) * mcase;
+    r[i] = r[i-1] - gamma * mean_cases[i] + eta_rng * r_scale;
+    if (i > 2) {
+      r[i] += beta * (r[i - 1] + r[i - 2]);
     }
-    if (i < t) {
-      R[i] = r_decay[2] * R[i - 1] + diff[i - 1];
-    }
+    lagged_mcase = mcase;
   }
+  R = exp(r);
 
   if (output_loglik) {
     for (i in 1:t_nots) {
