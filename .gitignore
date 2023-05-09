@@ -3,8 +3,7 @@
 .RData
 .Ruserdata
 figures
+old-figures
 /data-processed/epiforecasts-weeklygrowth/*
-model
 logs
 !/data-processed/epiforecasts-weeklygrowth/metadata-epiforecasts-weeklygrowth.txt
-incidence-damped

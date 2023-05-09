@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# Don't ignore the .gitignore file itself
+!.gitignore
+
+# Don't ignore these specific files
+!growth-damped.stan
+!undamped.stan
+!incidence-damped.stan
