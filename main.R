@@ -44,7 +44,7 @@ for (type in c("cases", "hospitalizations", "deaths")) {
   cases <- cases[!is.na(cases)]
 
   # Precompile the model
-  mod <- fv_model(model = "model.stan", strains = 1, verbose = TRUE)
+  mod <- fv_model(model = "incidence-damped.stan", strains = 1, verbose = TRUE)
 
   # Set up parallel forecasting
   plan("callr", workers = 2)

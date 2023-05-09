@@ -60,7 +60,7 @@ transformed parameters {
     mean_cases[i] = exp(r_est[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
     r_est[i] = r_est[i-1] - gamma * mean_cases[i] + eta[i - 1] * r_scale;
     if (i > 2) {
-      r_est[i] += beta * (r[i - 1] + r[i - 2]);
+      r_est[i] += beta * (r_est[i - 1] + r_est[i - 2]);
     }
   }
   rep_by_case = convolve(mean_cases, case_delay);
@@ -83,7 +83,7 @@ transformed parameters {
       print(init_cases);
       print(r_init);
       print(diff);
-      print(r);
+      print(r_est);
     }
   }
 }
