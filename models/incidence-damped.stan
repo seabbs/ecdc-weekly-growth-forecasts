@@ -148,18 +148,19 @@ generated quantities {
     real eta_rng = std_normal_rng();
 
     if (i == t_nots + 1) {
+      lagged_std_mcase = std_X[t_nots-1];
       mcase = convolve_step(to_vector(X), gt, i - 1);
     } else {
       mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
     }
-    mcase = exp(r[i - 1]) * mcase;
-    if (i < t) {
-      r[i] = r[i-1] - gamma * lagged_std_mcase + eta_rng * r_scale;
-      if (i > 2) {
-        r[i] += beta * (r[i - 1] + r[i - 2]);
-      }
-      lagged_std_mcase = mcase / mean_X;
+
+    r[i - 1] = r[i - 2] - gamma * lagged_std_mcase + eta_rng * r_scale;
+    if (i > 3) {
+      r[i - 1] += beta * (r[i - 2] + r[i - 3]);
     }
+
+    mcase = exp(r[i - 1]) * mcase;
+    lagged_std_mcase = mcase / mean_X;
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
     }else{
