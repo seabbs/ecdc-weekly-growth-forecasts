@@ -27,6 +27,7 @@ forecast_date <- lubridate::floor_date(
 source(here("R", "get_obs.R"))
 source(here("R", "format_forecasts.R"))
 source(here("R", "sample_decay.R"))
+source(here("R", "sample_incidence_damped.R"))
 
 forecasts <- list()
 for (type in c("cases", "hospitalizations", "deaths")) {
@@ -47,13 +48,13 @@ for (type in c("cases", "hospitalizations", "deaths")) {
   mod <- fv_model(model = "incidence-damped.stan", strains = 1, verbose = TRUE)
 
   # Set up parallel forecasting
-  plan("callr", workers = 2)
+  plan("callr", workers = 16)
 
   # Make forecasts
   fits <- future_lapply(
     split(cases, by = "location"),
     forecast,
-    fit = sample_decay,
+    fit = sample_incidence_damped,
     strains = 1,
     overdispersion = TRUE,
     r_forecast = TRUE,
