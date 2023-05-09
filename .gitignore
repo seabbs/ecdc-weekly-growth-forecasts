@@ -7,3 +7,4 @@ figures
 model
 logs
 !/data-processed/epiforecasts-weeklygrowth/metadata-epiforecasts-weeklygrowth.txt
+incidence-damped
