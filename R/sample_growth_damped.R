@@ -1,9 +1,13 @@
-sample_decay <- function (data, model = forecast.vocs::fv_model(strains = 2), 
-                          diagnostics = TRUE, ...) {
+sample_growth_damped <- function (
+    data, model = forecast.vocs::fv_model(strains = 2),
+    diagnostics = TRUE, ...
+) {
     cdata <- data
     cdata$start_date <- NULL
     cdata$seq_start_date <- NULL
-    custom_model <- fv_model(model = "model.stan", strains = 1)
+    custom_model <- fv_model(
+        model = "models/growth-damped.stan", strains = 1
+    )
     fit <- custom_model$sample(data = cdata, ...)
     out <- data.table(fit = list(fit), data = list(data), fit_args = list(list(...)))
     if (diagnostics) {

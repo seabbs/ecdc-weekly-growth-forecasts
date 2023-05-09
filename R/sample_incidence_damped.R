@@ -5,7 +5,9 @@ sample_incidence_damped <- function (
     cdata <- data
     cdata$start_date <- NULL
     cdata$seq_start_date <- NULL
-    custom_model <- fv_model(model = "incidence-damped.stan", strains = 1)
+    custom_model <- fv_model(
+        model = "models/incidence-damped.stan", strains = 1
+    )
     fit <- custom_model$sample(data = cdata, ...)
     out <- data.table(fit = list(fit), data = list(data), fit_args = list(list(...)))
     if (diagnostics) {

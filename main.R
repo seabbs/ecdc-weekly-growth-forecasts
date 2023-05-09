@@ -26,7 +26,7 @@ forecast_date <- lubridate::floor_date(
  # Load functions
 source(here("R", "get_obs.R"))
 source(here("R", "format_forecasts.R"))
-source(here("R", "sample_decay.R"))
+source(here("R", "sample_growth_damped.R"))
 source(here("R", "sample_incidence_damped.R"))
 
 forecasts <- list()
@@ -45,7 +45,9 @@ for (type in c("cases", "hospitalizations", "deaths")) {
   cases <- cases[!is.na(cases)]
 
   # Precompile the model
-  mod <- fv_model(model = "incidence-damped.stan", strains = 1, verbose = TRUE)
+  mod <- fv_model(
+    model = "models/incidence-damped.stan", strains = 1, verbose = TRUE
+  )
 
   # Set up parallel forecasting
   plan("callr", workers = 16)
