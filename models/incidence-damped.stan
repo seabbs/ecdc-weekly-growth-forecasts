@@ -60,9 +60,11 @@ transformed parameters {
   mean_cases[1] = init_cases[1];
   for (i in 2:t_nots) {
     mean_cases[i] = exp(r_est[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
-    r_est[i] = r_est[i-1] - gamma * std_X[i] + eta[i - 1] * r_scale;
-    if (i > 2) {
-      r_est[i] += beta * (r_est[i - 1] + r_est[i - 2]);
+    if (i < t_nots) {
+      r_est[i] = r_est[i-1] - gamma * std_X[i] + eta[i - 1] * r_scale;
+      if (i > 2) {
+        r_est[i] += beta * (r_est[i - 1] + r_est[i - 2]);
+      }
     }
   }
   rep_by_case = convolve(mean_cases, case_delay);
@@ -158,7 +160,11 @@ generated quantities {
       }
       lagged_std_mcase = mcase / mean_X;
     }
-
+    if (overdisp) {
+      sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
+    }else{
+      sim_cases[i] = poisson_rng(mcase);
+    }
   }
   R = exp(r);
 
