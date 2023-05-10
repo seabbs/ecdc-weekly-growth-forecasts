@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.2.2",
+    "Version": "4.3.0",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -198,11 +198,11 @@
       "Version": "0.5.3",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "cmdstanr",
       "RemoteUsername": "stan-dev",
+      "RemoteRepo": "cmdstanr",
       "RemoteRef": "HEAD",
-      "RemoteSha": "ab30e076952548007826e906155fc8b0d725d651",
+      "RemoteSha": "7036eeefab38f492e9263ed54ef29ff87d9d65e0",
+      "RemoteHost": "api.github.com",
       "Requirements": [
         "R",
         "R6",
@@ -213,7 +213,7 @@
         "processx",
         "withr"
       ],
-      "Hash": "b2588b73e88e050295c725fd3cbc0b61"
+      "Hash": "2336e3bca3ae2e962f3957ab4cbff27c"
     },
     "codetools": {
       "Package": "codetools",
@@ -368,13 +368,13 @@
     },
     "forecast.vocs": {
       "Package": "forecast.vocs",
-      "Version": "0.1.0",
+      "Version": "0.9.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteUsername": "epiforecasts",
       "RemoteRepo": "forecast.vocs",
       "RemoteRef": "HEAD",
-      "RemoteSha": "d9fc5791e2dc9fa450bd1017dd366022dd9ce677",
+      "RemoteSha": "eb475ff31025f6bb1f34e2e90ce158ce902c6033",
       "RemoteHost": "api.github.com",
       "Remotes": "stan-dev/cmdstanr",
       "Requirements": [
@@ -389,7 +389,7 @@
         "rstan",
         "scales"
       ],
-      "Hash": "4c90412c9b447d611ee1fe4b89c74855"
+      "Hash": "87db7ab25b9a37b147cd2b8b8fd8de1a"
     },
     "future": {
       "Package": "future",
