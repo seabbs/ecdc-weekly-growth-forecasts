@@ -151,6 +151,7 @@ generated quantities {
       lagged_std_mcase = std_X[t_nots-1];
       mcase = convolve_step(to_vector(X), gt, i - 1);
     } else {
+      lagged_std_mcase = mcase / mean_X;
       mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
     }
 
@@ -160,7 +161,6 @@ generated quantities {
     }
 
     mcase = exp(r[i - 1]) * mcase;
-    lagged_std_mcase = mcase / mean_X;
     if (overdisp) {
       sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
     }else{

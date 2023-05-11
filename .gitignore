@@ -7,3 +7,4 @@ old-figures
 /data-processed/epiforecasts-weeklygrowth/*
 logs
 !/data-processed/epiforecasts-weeklygrowth/metadata-epiforecasts-weeklygrowth.txt
+Rplots.pdf
