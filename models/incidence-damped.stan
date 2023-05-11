@@ -77,7 +77,7 @@ transformed parameters {
 
   if (debug) {
     int j = 0;
-    for (i in 1:t) {
+    for (i in 1:t_nots) {
       j += is_inf(mean_cases[i]) ? 1 : 0;
     }
     if (j) {
@@ -142,29 +142,31 @@ generated quantities {
   }
   // update case using initial cases, generation time and growth
   r[1:(t_nots-1)] = r_est;
-  for (i in (t_nots+1):t) {
+  {
     real mcase;
     real lagged_std_mcase;
-    real eta_rng = std_normal_rng();
+    for (i in (t_nots+1):t) {
+      real eta_rng = std_normal_rng();
 
-    if (i == t_nots + 1) {
-      lagged_std_mcase = std_X[t_nots-1];
-      mcase = convolve_step(to_vector(X), gt, i - 1);
-    } else {
-      lagged_std_mcase = mcase / mean_X;
-      mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
-    }
+      if (i == t_nots + 1) {
+        lagged_std_mcase = std_X[t_nots-1];
+        mcase = convolve_step(to_vector(X), gt, i - 1);
+      } else {
+        lagged_std_mcase = mcase / mean_X;
+        mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
+      }
 
-    r[i - 1] = r[i - 2] - gamma * lagged_std_mcase + eta_rng * r_scale;
-    if (i > 3) {
-      r[i - 1] += beta * (r[i - 2] + r[i - 3]);
-    }
+      r[i - 1] = r[i - 2] - gamma * lagged_std_mcase + eta_rng * r_scale;
+      if (i > 3) {
+        r[i - 1] += beta * (r[i - 2] + r[i - 3]);
+      }
 
-    mcase = exp(r[i - 1]) * mcase;
-    if (overdisp) {
-      sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
-    }else{
-      sim_cases[i] = poisson_rng(mcase);
+      mcase = exp(r[i - 1]) * mcase;
+      if (overdisp) {
+        sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
+      }else{
+        sim_cases[i] = poisson_rng(mcase);
+      }
     }
   }
   R = exp(r);

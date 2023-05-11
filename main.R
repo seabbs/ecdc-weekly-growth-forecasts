@@ -49,13 +49,9 @@ for (type in c("cases", "hospitalizations", "deaths")) {
     model = "models/incidence-damped.stan", strains = 1, verbose = TRUE
   )
 
-  # Set up parallel forecasting
-  plan("callr", workers = 16)
 
   # Make forecasts
-  fits <- future_lapply(
-    split(cases, by = "location"),
-    forecast,
+  fit <- forecast(cases[location %in% "AT"],
     fit = sample_incidence_damped,
     strains = 1,
     overdispersion = TRUE,
@@ -66,13 +62,38 @@ for (type in c("cases", "hospitalizations", "deaths")) {
     beta = c(0, 0.25),
     probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
     parallel_chains = 1,
-    iter_warmup = 1000,
+    iter_warmup = 1,
     iter_sampling = 1000,
     chains = 2,
     adapt_delta = 0.99,
     max_treedepth = 15,
-    future.seed = TRUE
+    save_warmup = FALSE
   )
+
+  # Set up parallel forecasting
+  # plan("callr", workers = 16)
+
+  # # Make forecasts
+  # fits <- future_lapply(
+  #   split(cases, by = "location"),
+  #   forecast,
+  #   fit = sample_incidence_damped,
+  #   strains = 1,
+  #   overdispersion = TRUE,
+  #   r_forecast = TRUE,
+  #   r_step = 1,
+  #   keep_fit = TRUE,
+  #   horizon = 8,
+  #   beta = c(0, 0.25),
+  #   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
+  #   parallel_chains = 1,
+  #   iter_warmup = 1000,
+  #   iter_sampling = 1000,
+  #   chains = 2,
+  #   adapt_delta = 0.99,
+  #   max_treedepth = 15,
+  #   future.seed = TRUE
+  # )
 
   # merge fits and add location names
   fits <- rbindlist(
