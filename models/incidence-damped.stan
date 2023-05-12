@@ -40,7 +40,7 @@ parameters {
   real<lower = 0> r_scale;
   real<lower = -1, upper = 1> beta;
   real<lower = 0> gamma;
-  vector[eta_n] eta;
+  vector[t_nots-1] eta;
   vector[1] init_cases;
   vector[period > 1 ? 1 : 0] period_sd;
   vector[period > 1 ? period : 0] period_eff;
@@ -48,7 +48,6 @@ parameters {
 }
 
 transformed parameters {
-  vector[t - 2] diff;
   vector[t_nots - 1] r_est;
   vector<lower = 0>[t_nots] mean_cases;
   vector<lower = 0>[t_nots] rep_by_case;
@@ -56,14 +55,13 @@ transformed parameters {
 
   r_est[1] = r_init;
   // update case using initial cases, generation time and growth
-  mean_cases = rep_vector(0, t_nots);
   mean_cases[1] = init_cases[1];
   for (i in 2:t_nots) {
     mean_cases[i] = exp(r_est[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
     if (i < t_nots) {
-      r_est[i] = r_est[i-1] - gamma * std_X[i] + eta[i - 1] * r_scale;
+      r_est[i] = r_est[i-1] + - gamma * std_X[i - 1] + eta[i - 1] * r_scale;
       if (i > 2) {
-        r_est[i] += beta * (r_est[i - 1] + r_est[i - 2]);
+        r_est[i] += beta * abs(r_est[i - 1] - r_est[i - 2]);
       }
     }
   }
@@ -72,7 +70,7 @@ transformed parameters {
                                     period_sd);
   // rescale observation model
   if (overdisp) {
-    phi[1] = 1 ./ sqrt(sqrt_phi[1]);
+    phi[1] = inv_square(sqrt_phi[1]);
   }
 
   if (debug) {
@@ -86,7 +84,6 @@ transformed parameters {
       print(sd_init_cases);
       print(init_cases);
       print(r_init);
-      print(diff);
       print(r_est);
     }
   }
@@ -158,7 +155,7 @@ generated quantities {
 
       r[i - 1] = r[i - 2] - gamma * lagged_std_mcase + eta_rng * r_scale;
       if (i > 3) {
-        r[i - 1] += beta * (r[i - 2] + r[i - 3]);
+        r[i - 1] += beta * abs(r[i - 2] - r[i - 3]);
       }
 
       mcase = exp(r[i - 1]) * mcase;

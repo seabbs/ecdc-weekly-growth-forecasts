@@ -81,7 +81,7 @@ transformed parameters {
                                     period_sd);
   // rescale observation model
   if (overdisp) {
-    phi[1] = 1 ./ sqrt(sqrt_phi[1]);
+    phi[1] = inv_square(sqrt_phi[1]);
   }
 
   if (debug) {
