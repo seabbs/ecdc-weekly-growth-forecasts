@@ -29,6 +29,7 @@ source(here("R", "format_forecasts.R"))
 source(here("R", "sample_growth_damped.R"))
 source(here("R", "sample_incidence_damped.R"))
 source(here("R", "damped_inits.R"))
+source(here("R", "identify_outliers.R"))
 
 forecasts <- list()
 for (type in c("cases", "hospitalizations", "deaths")) {
@@ -44,6 +45,17 @@ for (type in c("cases", "hospitalizations", "deaths")) {
   cases[, cases := ifelse(cases < 0, shifted_cases, cases), by = "location"]
   cases[, shifted_cases := NULL]
   cases <- cases[!is.na(cases)]
+
+  # # Identify outliers with MAD
+  # cases <- cases[,
+  #    identify_outliers_with_std(
+  #     .SD, value_col = "cases", window_size = 8, difference_period = 0,
+  #     upper_threshold = 2, lower_threshold = 2
+  #   ),
+  #   by = "location"
+  # ]
+  # # Filter out the first 8 weeks of data as can't detect outliers here
+  # cases <- cases[, .SD[5:.N, ], by = "location"]
 
   # Precompile the model
   mod <- fv_model(
@@ -73,29 +85,30 @@ for (type in c("cases", "hospitalizations", "deaths")) {
   )
 
   # Set up parallel forecasting
-  # plan("callr", workers = 16)
+  plan("callr", workers = 16)
 
-  # # Make forecasts
-  # fits <- future_lapply(
-  #   split(cases, by = "location"),
-  #   forecast,
-  #   fit = sample_incidence_damped,
-  #   strains = 1,
-  #   overdispersion = TRUE,
-  #   r_forecast = TRUE,
-  #   r_step = 1,
-  #   keep_fit = TRUE,
-  #   horizon = 8,
-  #   beta = c(0, 0.25),
-  #   probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
-  #   parallel_chains = 1,
-  #   iter_warmup = 1000,
-  #   iter_sampling = 1000,
-  #   chains = 2,
-  #   adapt_delta = 0.99,
-  #   max_treedepth = 15,
-  #   future.seed = TRUE
-  # )
+  # Make forecasts
+  fits <- future_lapply(
+    split(cases, by = "location"),
+    forecast,
+    fit = sample_incidence_damped,
+    inits = damped_inits,
+    strains = 1,
+    overdispersion = TRUE,
+    r_forecast = TRUE,
+    r_step = 1,
+    keep_fit = TRUE,
+    horizon = 8,
+    beta = c(0, 0.25),
+    probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99),
+    parallel_chains = 1,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    chains = 2,
+    adapt_delta = 0.99,
+    max_treedepth = 15,
+    future.seed = TRUE
+  )
 
   # merge fits and add location names
   fits <- rbindlist(

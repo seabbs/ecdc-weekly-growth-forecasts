@@ -56,15 +56,21 @@ transformed parameters {
   r_est[1] = r_init;
   // update case using initial cases, generation time and growth
   mean_cases[1] = init_cases[1];
-  for (i in 2:t_nots) {
-    mean_cases[i] = exp(r_est[i - 1]) * convolve_step(to_vector(X), gt, i - 1);
-    if (i < t_nots) {
-      r_est[i] = r_est[i-1] + - gamma * std_X[i - 1] + eta[i - 1] * r_scale;
-      if (i > 2) {
-        r_est[i] += beta * abs(r_est[i - 1] - r_est[i - 2]);
+  {
+    real lagged_std_mcase;
+    for (i in 2:t_nots) {
+      mean_cases[i] = exp(r_est[i - 1]) * convolve_step(mean_cases, gt, i - 1);
+      lagged_std_mcase = mean_cases[i - 1] / mean_X;
+      if (i < t_nots) {
+        r_est[i] =
+         r_est[i-1] + - gamma * lagged_std_mcase + eta[i - 1] * r_scale;
+        if (i > 2) {
+          r_est[i] += beta * abs(r_est[i - 1] - r_est[i - 2]);
+        }
       }
     }
   }
+
   rep_by_case = convolve(mean_cases, case_delay);
   rep_by_case = periodic_adjustment(rep_by_case, periodic, period_eff,
                                     period_sd);
@@ -140,29 +146,25 @@ generated quantities {
   // update case using initial cases, generation time and growth
   r[1:(t_nots-1)] = r_est;
   {
-    real mcase;
+    vector[t] mcase;
+    mcase[1:t_nots] = mean_cases;
     real lagged_std_mcase;
     for (i in (t_nots+1):t) {
-      real eta_rng = std_normal_rng();
+      mcase[i] = convolve_step(mcase, gt, i - 1);
 
-      if (i == t_nots + 1) {
-        lagged_std_mcase = std_X[t_nots-1];
-        mcase = convolve_step(to_vector(X), gt, i - 1);
-      } else {
-        lagged_std_mcase = mcase / mean_X;
-        mcase = convolve_step(to_vector(sim_cases), gt, i - 1);
-      }
+      real eta_rng = std_normal_rng();
+      lagged_std_mcase = mcase[i - 1] / mean_X;
 
       r[i - 1] = r[i - 2] - gamma * lagged_std_mcase + eta_rng * r_scale;
       if (i > 3) {
         r[i - 1] += beta * abs(r[i - 2] - r[i - 3]);
       }
 
-      mcase = exp(r[i - 1]) * mcase;
+      mcase[i] = exp(r[i - 1]) * mcase[i];
       if (overdisp) {
-        sim_cases[i] = neg_binomial_2_rng(mcase, phi[1]);
+        sim_cases[i] = neg_binomial_2_rng(mcase[i], phi[1]);
       }else{
-        sim_cases[i] = poisson_rng(mcase);
+        sim_cases[i] = poisson_rng(mcase[i]);
       }
     }
   }

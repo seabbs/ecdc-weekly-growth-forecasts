@@ -29,7 +29,7 @@ damped_inits <- function(data, strains = 2) {
       )
       if (data$relat == 1) {
         inits$voc_beta <- array(rnorm(1, 0, 0.1))
-      }else {
+      } else {
         inits$voc_beta <- numeric(0)
       }
       if (data$relat > 0) {

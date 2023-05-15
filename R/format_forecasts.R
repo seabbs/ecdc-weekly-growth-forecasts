@@ -9,10 +9,12 @@ format_forecasts <- function(forecasts, forecast_date, type = "cases", point = F
   cols <- c("location", "location_name", "date", "horizon", cols)
   forecasts <- forecasts[, ..cols]
   forecasts <- forecasts[, horizon := ceiling((date - forecast_date) / 7),
-                         by = c("location")]
+    by = c("location")
+  ]
   forecasts <- forecasts[horizon >= min_horizon & horizon <= max_horizon]
   forecasts <- forecast.vocs::quantiles_to_long(forecasts)
-  forecasts <- forecasts[,
+  forecasts <- forecasts[
+    ,
     .(
       forecast_date = forecast_date,
       target = paste0(horizon, " wk ahead inc ", hub_label[type]),
@@ -32,7 +34,7 @@ format_forecasts <- function(forecasts, forecast_date, type = "cases", point = F
 }
 
 adjust_to_max_pop <- function(forecasts, population) {
-  population <- population[,c("location", "population")]
+  population <- population[, c("location", "population")]
   forecasts <- merge(forecasts, population, by = "location")
   forecasts[value >= population, value := population - 1]
   forecasts[, population := NULL]
@@ -42,7 +44,7 @@ adjust_to_max_pop <- function(forecasts, population) {
 exclude_missing_forecasts <- function(forecasts) {
   miss_locations <- forecasts[type %in% "point"][is.na(value)]
   miss_locations <- unique(miss_locations[, location])
-  if (length(miss_locations) > 0){
+  if (length(miss_locations) > 0) {
     warning("Forecasts are missing for the following locations: ", paste(miss_locations, collapse = ", "))
     forecasts <- forecasts[!(location %in% miss_locations)]
   }
