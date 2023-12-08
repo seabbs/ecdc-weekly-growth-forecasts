@@ -29,7 +29,7 @@ source(here("R", "format_forecasts.R"))
 source(here("R", "sample_decay.R"))
 
 forecasts <- list()
-for (type in c("cases", "hospitalizations", "deaths")) {
+for (type in c("hospitalizations", "deaths")) {
   if (!dir.exists(here("logs", type))) {
     dir.create(here("logs", type), recursive = TRUE)
   }
